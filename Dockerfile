@@ -13,6 +13,6 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /usr/share/nginx/html
 
-COPY --from=build-env /usr/src/mario-blog/public /usr/share/nginx/html
+COPY --from=build-dev /usr/src/mario-blog/public /usr/share/nginx/html
 
 EXPOSE 80

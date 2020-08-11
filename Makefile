@@ -1,7 +1,7 @@
 
 CONTAINER_TAG = mario-blog
-PROJECT_PORT = 9001
-CONTAINER_PORT = 80
+PROJECT_PORT = 80
+CONTAINER_PORT = 9001
 
 TARGET_DIR = target
 IMAGES_DIR = images
@@ -20,7 +20,7 @@ docker_build:
 	docker build -t $(CONTAINER_TAG) --rm .
 
 docker: docker_clean docker_init docker_build
-	docker run --registry-mirror=https://docker.mirrors.ustc.edu.cn -d --name $(CONTAINER_TAG) -p $(CONTAINER_PORT):$(PROJECT_PORT) $(CONTAINER_TAG)
+	docker run -d --name $(CONTAINER_TAG) -p $(CONTAINER_PORT):$(PROJECT_PORT) $(CONTAINER_TAG)
 	# sudo docker rmi `sudo docker images | grep '<none>' | awk '{ print $3 }' | sed ':a;N;s/\n/ /g;ba'`
 	docker image prune -f
 
