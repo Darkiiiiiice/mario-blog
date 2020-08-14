@@ -59,9 +59,6 @@ jobs:
         ssh-keyscan ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
         ls ~/.ssh
         echo ${{ secrets.SSH_HOST }}
-        ssh -t -t ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo "github action" >> github.log"
-        echo "github action" >> github.log
-        echo Add other actions to build,
-        echo test, and deploy your project.
+        ssh -t -t ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "sh /root/run-mario-blog.sh"
   # deploy:
   #   needs: build
