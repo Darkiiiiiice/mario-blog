@@ -51,8 +51,10 @@ jobs:
         SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
       run: |
         mkdir ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" >> ~/.ssh/id_rsa
-        ssh $SSH_USERNAME@$SSH_HOST
+        ls ~/.ssh
+        echo '${{ secrets.SSH_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
+        echo '${{ secrets.SSH_PUBLIC_KEY }}' >> ~/.ssh/id_rsa.pub
+        ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}
         echo "github action" >> github.log
         echo Add other actions to build,
         echo test, and deploy your project.
