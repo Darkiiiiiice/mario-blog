@@ -39,7 +39,7 @@ jobs:
 
     - name: Deploy Docker Image
       run: |
-        docker login --username=zbackdoor@qq.com registry.cn-chengdu.aliyuncs.com
+        docker login --username=${{ secrets.ALIYUN_DOCKER_USERNAME }} --password=${{secrets.ALIYUN_DOCKER_PASSWORD}} registry.cn-chengdu.aliyuncs.com
         docker push registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
 
     # Runs a set of commands using the runners shell
