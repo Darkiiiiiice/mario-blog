@@ -54,6 +54,8 @@ jobs:
         ls ~/.ssh
         echo '${{ secrets.SSH_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
         echo '${{ secrets.SSH_PUBLIC_KEY }}' >> ~/.ssh/id_rsa.pub
+        echo 'StrictHostKeyChecking no' >> ~/.ssh/config
+        echo 'UserKnownHostsFile /dev/null' >> ~/.ssh/config
         touch ~/.ssh/known_hosts
         ls ~/.ssh
         ssh-keygen -R ${{ secrets.SSH_HOST }}
