@@ -55,6 +55,7 @@ jobs:
         echo '${{ secrets.SSH_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
         echo '${{ secrets.SSH_PUBLIC_KEY }}' >> ~/.ssh/id_rsa.pub
         ls ~/.ssh
+        ssh-keygen -R ${{ secrets.SSH_HOST }}
         ssh -t -t ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}
         echo "github action" >> github.log
         echo Add other actions to build,
