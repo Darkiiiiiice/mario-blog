@@ -32,11 +32,12 @@ jobs:
         docker push registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
 
   deploy:
-    - uses: actions/checkout@v2
+  
     needs: build
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
     # ssh to deploy service
     - name: Deploy docker image
       env: 
