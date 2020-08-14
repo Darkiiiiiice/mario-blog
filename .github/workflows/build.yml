@@ -34,8 +34,8 @@ jobs:
     #     ls ./public
 
     # Make Docker Images
-    - name: Make Docker Image
-      run: make docker_build
+    # - name: Make Docker Image
+    #   run: make docker_build
 
     # - name: Push docker image to aliyun
     #   run: |
@@ -54,6 +54,7 @@ jobs:
         ls ~/.ssh
         echo '${{ secrets.SSH_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
         echo '${{ secrets.SSH_PUBLIC_KEY }}' >> ~/.ssh/id_rsa.pub
+        ls ~/.ssh
         ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}
         echo "github action" >> github.log
         echo Add other actions to build,
