@@ -36,6 +36,11 @@ jobs:
         docker tag mario-blog registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
         docker push registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
     # ssh to deploy service
     - name: Deploy docker image
       env: 
@@ -44,7 +49,6 @@ jobs:
         SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
       run: |
         mkdir ~/.ssh
-        ls ~/.ssh
         echo '${{ secrets.SSH_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
         echo '${{ secrets.SSH_PUBLIC_KEY }}' >> ~/.ssh/id_rsa.pub
         chmod 600 ~/.ssh/id_rsa
@@ -52,5 +56,4 @@ jobs:
         ssh-keyscan ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
         scp ./deploy.sh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/root/deploy-mario-blog.sh
         ssh -t -t ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "sh /root/deploy-mario-blog.sh ${{ secrets.ALIYUN_DOCKER_USERNAME }} ${{secrets.ALIYUN_DOCKER_PASSWORD}}"
-  # deploy:
-  #   needs: build
+        ssh -t -t ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm /root/deploy-mario-blog.sh"
