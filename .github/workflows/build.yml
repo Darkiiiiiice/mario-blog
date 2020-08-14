@@ -63,6 +63,6 @@ jobs:
         echo "github action" >> github.log
         echo Add other actions to build,
         echo test, and deploy your project.
-        logout
+        exit
   # deploy:
   #   needs: build
