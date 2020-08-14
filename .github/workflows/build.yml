@@ -33,20 +33,28 @@ jobs:
     #     hexo generator
     #     ls ./public
 
-    # Runs a single command using the runners shell
+    # Make Docker Images
     - name: Make Docker Image
       run: make docker_build
 
-    - name: Deploy Docker Image
-      run: |
-        docker login --username=${{ secrets.ALIYUN_DOCKER_USERNAME }} --password=${{secrets.ALIYUN_DOCKER_PASSWORD}} registry.cn-chengdu.aliyuncs.com
-        docker tag mario-blog registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
-        docker push registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
-
-    # Runs a set of commands using the runners shell
-    # - name: Run a multi-line script
+    # - name: Push docker image to aliyun
     #   run: |
-    #     echo Add other actions to build,
-    #     echo test, and deploy your project.
+    #     docker login --username=${{ secrets.ALIYUN_DOCKER_USERNAME }} --password=${{secrets.ALIYUN_DOCKER_PASSWORD}} registry.cn-chengdu.aliyuncs.com
+    #     docker tag mario-blog registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
+    #     docker push registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
+
+    # ssh to deploy service
+    - name: Deploy docker image
+      env: 
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      run: |
+        mkdir ~/.ssh
+        cat ${{ secrets.SSH_PRIVATE_KEY }} >> ~/.ssh/id_rsa
+        ssh $SSH_USERNAME@$SSH_HOST
+        echo "github action" >> github.log
+        echo Add other actions to build,
+        echo test, and deploy your project.
   # deploy:
   #   needs: build
