@@ -1,5 +1,5 @@
 
-CONTAINER_TAG = mario-blog
+CONTAINER_TAG = mario-blog:latest
 PROJECT_PORT = 80
 CONTAINER_PORT = 9001
 

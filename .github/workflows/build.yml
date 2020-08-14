@@ -17,7 +17,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: centos-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -40,7 +40,8 @@ jobs:
     - name: Deploy Docker Image
       run: |
         docker login --username=${{ secrets.ALIYUN_DOCKER_USERNAME }} --password=${{secrets.ALIYUN_DOCKER_PASSWORD}} registry.cn-chengdu.aliyuncs.com
-        docker push registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
+        docker tag mario-blog registry.cn-chengdu.aliyuncs.com/mariomang/mario-blog:latest
+        docker push registry.cn-chengdu.aliyuncs.com/mariomang/marioblog:latest
 
     # Runs a set of commands using the runners shell
     # - name: Run a multi-line script
