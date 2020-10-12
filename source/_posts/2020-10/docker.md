@@ -80,30 +80,37 @@ cover: /resources/images/default_cover.gif
     ``` Bash
     $ sudo docker info
     ```
+
 * 启动 Docker 镜像
     ``` Bash
     $ sudo docker run -i -t ubuntu /bin/bash
     ```
+
 * 停止 Docker 镜像
     ``` Bash
     $ sudo docker stop container_name/container_id
     ```
+
 * 重新启动已经停止的容器
     ``` Bash
     $ sudo docker start container_name/container_id
     ```
+
 * 附着到正在运行的容器上
     ``` Bash
     $ sudo docker attach container_name/container_id
     ```
+
 * 创建守护式容器
     ``` Bash
     $ sudo docker run -d ubuntu /bin/bash
-    ``` 
+    ```
+
 * 获取容器日志
     ``` Bash
     $ sudo docker logs container_name/container_id
     ```
+
 * 查看守护式容器进程
     ``` Bash
     $ sudo docker top container_name
