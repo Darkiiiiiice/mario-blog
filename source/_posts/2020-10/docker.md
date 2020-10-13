@@ -116,6 +116,71 @@ cover: /resources/images/default_cover.gif
     $ sudo docker top container_name
     ```
 
+* 自动重启容器
+    ``` Bash
+    $ sudo docker run --restart=always -d ubuntu
+    ```
+
+* 查看容器信息
+    ``` Bash
+    $ sudo docker inspect daemon_container
+    ```
+
+* 删除容器
+    ``` Bash
+    $ sudo docker rm container
+    ```
+
+### Docker 镜像和仓库
+
+Docker 镜像是由文件系统叠加而成。最底端是一个引导文件系统，即bootfs，这很像典型的 Linux/Unix 的引导文件系统  
+
+* 列出 Docker 镜像
+    ``` Bash
+    $ sudo docker images
+    ```
+    > 本地镜像都保存在 Docker 宿主机的 /var/lib/docker 目录下
+
+* 拉取 Docker 镜像
+    ``` Bash
+    $ sudo docker pull ubuntu:20.04
+    ```
+
+* 查找镜像
+    ``` Bash
+    $ sudo docker search nginx
+    ```
+
+* 提交定制容器
+    ``` Bash
+    $ sudo docker commit container_id mariomang/ubuntu
+    ```
+
+#### 用 Dockerfile 构建镜像
+
+1. 创建示例仓库
+    ``` Bash
+    $ mkdir static_web
+    $ cd !$
+    $ touch Dockerfile
+    ```
+
+2. 编写 Dockerfile 
+    ``` Dockerfile
+    # Version: 0.0.1
+    FROM ubuntu:20.04
+    MAINTAINER MarioMang "mariomang@exmaple.com"
+    RUN apt-get update && apt-get install -y nginx
+    RUN echo 'Hi, I am in your container' \
+        > /usr/share/nginx/html/index.html
+    EXPOSE 80
+    ```
+
+3. 基于 Dockerfile 构建镜像
+    ``` Bash
+    $ sudo docker build -t="mariomang/static_web" .
+    ```
+
 
 
 
