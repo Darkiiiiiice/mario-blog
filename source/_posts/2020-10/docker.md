@@ -180,9 +180,171 @@ Docker 镜像是由文件系统叠加而成。最底端是一个引导文件系�
     ``` Bash
     $ sudo docker build -t="mariomang/static_web" .
     ```
+4. 忽略 Dockerfile 的构建缓存
+    ``` Bash
+    $ sudo docker build --no-cache -t="mariomang/static_web"
+    ```
 
+#### Dockerfile 指令
 
+1. CMD 
+    > CMD 指令用于指定容器启动时要运行的指令  
+    > 使用 docker run 命令可以覆盖 CMD 指令
+    > 在 Dockerfile 中只能指定一条指令
+    > 如果有多条CMD指令，只有最后一条CMD指令会被使用
+    1. 使用CMD指令
+    ``` Dockerfile
+    CMD ["/bin/bash"]
+    ```
 
+    2. 给CMD指令传递参数
+    ``` Dockerfile
+    CMD ["/bin/bash", "-l"]
+    ```
 
+2. ENTRYPOINT
+    > 在启动容器时不容易被覆盖
+    > 用户可以在运行时通过 docker run 的 --entrypoint 标志覆盖 ENTRYPOINT
+    1. 使用 ENTRYPOINT 指令
+    ``` Dockerfile
+    ENTRYPOINT ["/usr/sbin/nginx"]
+    ```
 
+    2. 为ENTRYPOINT指令指定参数
+    ``` Dockerfile
+    ENTRYPOINY ["/usr/sbin/nginx","-g","daemon off;"]
+    ```
 
+3. WORKDIR
+    > WORKDIR 指令用来在从镜像创建一个新容器时，在容器内部设置一个工作目录， ENTRYPOINT和CMD指定的程序会在这个目录下执行
+    1. 使用 WORKDIR 指令
+    ``` Dockerfile
+    WORKDIR /opt/webapp/db
+    ```
+    2. 覆盖工作目录
+    ``` Dockerfile
+    $ sudo docker run -it -w /var/log ubuntu pwd
+    ```
+
+4. ENV
+    > ENV 指令用来在镜像构建过程中设置环境变量
+    1. 在 Dockerfile 文件中设置环境变量
+    ``` Dockerfile
+    ENV RVM_PATH /home/rvm
+    ```
+    2. 使用 ENV 设置多个环境变量
+    ``` Dockerfile
+    ENV RVM_PATH=/home/rvm RVM_ARCHFLAGS="-arch i386"
+    ```
+    3. 在 Dockerfile 中使用环境变量
+    ``` Dockerfile
+    ENV TARGET_DIR /opt/app
+    WORKDIR $TARGET_DIR
+    ```
+
+5. USER
+    > USER 指令用来指定该镜像会以什么样的用户去运行
+    1. 使用 USER 指令
+    ``` Dockerfile
+    USER nginx
+    ```
+    2. 指定 USER 和 GROUP 的各种组合
+    ``` Dockerfile
+    USER user
+    USER user:group
+    USER uid
+    USER uid:gid
+    USER user:gid
+    USER uid:group
+    ```
+
+6. VOLUME
+    > VOLUME 指令用来向基于镜像创建的容器添加卷
+    > 一个卷可以存在于一个或者多个容器内的特定目录
+    * 卷可以在容器间共享和重用
+    * 一个容器可以不是必须和其他容器共享卷
+    * 对卷的修改是立即生效的
+    * 对卷的修改不会更新镜像产生影响
+    * 卷会一直存在直到没有任何容器再使用它
+
+    1. 使用 VOLUME 指令
+    ``` Dockerfile
+    VOLUME ["/opt/project"]
+    ```
+    2. 使用 VOLUME 指令指定多个卷
+    ``` Dockerfile
+    VOLUME ["/opt/project", "/data"]
+    ```
+
+7. ADD
+    > ADD 指令用来将构建环境下的文件和目录复制到镜像中
+
+    1. 使用 ADD 指令
+    ``` Dockerfile
+    ADD software.so /opt/application/software.so
+    ```
+    2. 在 ADD 指令中使用 URL 作为文件源
+    ``` Dockerfile
+    ADD http://xxxx.com/latest.zip /opt/latest.zip
+    ```
+    3. 将归档文件作为 ADD 指令中的源文件
+    > Docker 会将归档文件解开到目录下
+    > Docker 解开归档文件 = tar -x
+    ``` Dockerfile
+    ADD latest.tar.gz /opt/latest/
+    ```
+
+8. COPY 
+    > COPY 非常类似 ADD, 区别在于 COPY 不会提取文件和解压文件
+
+    1. 使用 COPY 指令
+    ``` Dockerfile
+    COPY conf.d/ /etc/conf.d/
+    ```
+
+9. LABEL
+    > LABEL 指令用于为Docker 镜像添加元数据
+    > 元数据以键值对的形式展现
+
+    1. 添加 LABEL指令
+    ``` Dockerfile
+    LABEL version="1.0"
+    LABEL location="Beijing" type="Data Center" role="Web Server"
+    ```
+
+10. STOPSIGNAL
+    > STOPSIGNAL 指令用来设置停止容器时发送什么系统调用信号给容器
+
+11. ARG
+    > ARG 指令用来定义可以在 docker build 命令运行时传递给构建运行时的变量
+    > 只需要在构建时使用 --build-arg 标志即可
+    
+    1. 添加 ARG指令
+    ``` Dockerfile
+    ARG build
+    ARG webapp_user=user
+    ```
+    2. 使用 ARG 指令
+    ``` Bash
+    $ sudo docker build --build-arg build=1234 -t webapp .
+    ```
+    3. 预定义 ARG 变量
+    ``` Txt
+    HTTP_PROXY
+    http_proxy
+    HTTPS_PROXY
+    https_proxy
+    FTP_PROXY
+    ftp_proxy
+    NO_PROXY
+    no_proxy
+    ```
+
+12. ONBUILD
+    > ONBUILD 指令能为镜像添加触发器
+
+    1. 添加 ONBUILD 指令
+    ``` Dockerfile
+    ONBUILD ADD . /app/src
+    ONBUILD RUN cd /app/src && make
+    ```
