@@ -348,3 +348,39 @@ Docker 镜像是由文件系统叠加而成。最底端是一个引导文件系�
     ONBUILD ADD . /app/src
     ONBUILD RUN cd /app/src && make
     ```
+
+#### Docker Networking
+
+> Docker Networking 允许用户创建自己的网络，容器可以通过这个网上互相通信
+
+1. 创建 Docker 网络
+``` Bash
+$ sudo docker network create app
+```
+> 这里用 docker network 创建了一个桥接网络
+
+2. 在 Docker 网络中使用容器
+``` Bash
+$ sudo docker run -d --net=app redis
+```
+
+3. 将已有网络添加到容器
+``` Bash
+$ sudo docker network connect app redis
+```
+
+4. 从网络中断开一个容器
+``` Bash
+$ sudo docker network disconnect app redis
+```
+
+5. 链接另一个容器
+``` Bash
+$ sudo docker run --link redis:redis-name ubuntu
+```
+
+6. 在容器内添加 /etc/hosts 记录
+``` Bash
+$ sudo docker run --add-host=docker:172.18.0.2 redis
+```
+
