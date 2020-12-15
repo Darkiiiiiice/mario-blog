@@ -4,7 +4,7 @@ date: '2020-11-30 23:00:00'
 category: Git
 author: MarioMang
 cover: /resources/images/default_cover.gif
-updated: '2020-12-14 23:00:00'
+updated: '2020-12-15 23:00:00'
 ---
 
 # Git 版本控制管理
@@ -532,6 +532,238 @@ $ git reset --hard ORIG_HEAD
 2. 快进的
 	> 当分支 HEAD 已经在其他分支中完全存在或表示时, 就会发生快进合并
 
-(未完待续...)
+
+## 更改提交
+
+可以允许修改提交:
+1. 可以在某个问题成为遗留问题之前修复
+2. 可以将大的变更修改为一系列小的提交
+3. 可以合并反馈和建议
+4. 可以在不破坏构建需求的情况下重新排列提交序列
+5. 可以将提交调整为一个更合乎逻辑的序列
+6. 可以删除意外提交的调试代码
+
+如果一个分支已经公开了, 并且可能已经存在于其他版本库中, 则不应该重写或修改提交
+
+### 使用 git reset 
+git reset 会把版本库和工作目录变更为已知状态, 具体而言, git reset 调整HEAD引用指向给定的提交
+
+主要选项:
+1. git reset--soft 
+``` bash 
+$ git reset --soft
+```
+--soft 会将HEAD引用指向给定提交, 索引和工作目录的内容都将保持不变, 只改变一个符号引用的状态
+
+2. git reset--mixed
+``` bash
+$ git reset --mixed
+```
+--mixed 会将HEAD指向给定提交, 索引内容也跟着改变以符合给定提交的树结构, 但是工作目录中的内容保持不变
+
+3. git reset --hard
+``` bash
+$ git reset --hard
+```
+--hard 会将HEAD引用指向给定提交, 索引的内容和工作目录的内容都会随之改变, 所有修改都会丢失
+
+git reset 会把原始 HEAD 值存储在 ORIG_HEAD 中
+
+
+### 使用 git cherry-pick
+git cherry-pick 会在当前分支上应用给定提交引入的变更, 这将引入一个新的特殊提交  
+严格来说, 使用 git cherry-pick 并不改变版本库中的现有历史记录, 而是添加历史记录
+
+### 使用 git revert 
+git revert 和 git cherry-pick 命令大致相同, 但有一个区别, 它应用给定提交的逆过程, 因此, 此命令引入一个新提交来抵消给定提交的影响
+
+### 使用 git commit --amend
+git commit --amend 最频繁的操作时在刚做出一个提交后修改录入错误  
+对于普通的 git commit 命令, git commit --amend 会弹出编辑器会话, 可以在里面修改提交消息
+
+### 基变提交
+git rebase 命令用来改变一串提交以什么为基础  
+git rebase 最常见的用途时保持你正在开发的一系列提交相对于另一个分支是最新的
+
+当从别处复制版本库之后, 会经常使用 git rebase 操作来把开发分支向前移植到 另一个追踪分支上
+``` bash
+$ git rebase master
+```
+
+git rebase 也可以用--onto选项把一条分支上的开发线整个移植到完全不同的分支上
+``` bash
+$ git rebase --onto master maint^ feature
+```
+> 把feature分支从 maint上迁移到master
+
+如果变基操作不是正确的选择, 那合并可能是最好的处理方式
+
+* 变基操作把提交重写成新提交
+* 不可达的旧提交会消失 
+* 任何旧的, 变基前的提交的用户可能被困住
+* 如果你有分支用变基前的提交, 你可能需要反过来对他基变
+
+
+## 储藏和引用日志
+stash 可以捕获你的工作进度, 并且在方便时再回退到该进度
+``` bash
+$ git stash save
+```
+
+弹出之前保存的工作进度
+``` bash
+$ git stash pop
+```
+
+删除上一次保存的工作进度
+``` bash 
+$ git stash drop
+```
+
+查看所有储存的进度
+``` bash
+$ git stash list
+```
+
+### 引用日志
+引用日志记录非裸版本库中分支头的改变  
+会更新引用日志的基本操作: 
+* 复制
+* 推送
+* 执行新提交
+* 修改或创建分支
+* 变基操作
+* 重置操作
+
+查看引用日志
+``` bash 
+$ git reflog show
+```
+
+## 远程版本库
+
+远程版本库是一个引用或句柄, 通过文件系统或网络指向另一个版本库
+
+### 版本库概念
+* 裸版本库(bare): 裸版本库没有工作目录, 并且不应该用于正常开发, 同时也没有检出分支的概念, 裸版本库可以简单的看作.git目录的内容  
+裸版本库的关键: 作为写作开发的权威焦点
+``` bash
+$ git clone --bare url
+```
+
+* 非裸版本库(nobare): 
+
+* 版本库克隆: git clone 会创建一个新的 Git 版本库, 基于你通过文件系统或网络地址指定的原始版本库  
+默认情况下, 每个新克隆的版本库都通过一个称为origin的远程版本库, 建立一个链接指回他的父版本库
+
+* 远程版本库: Git使用远程版本库和远程追踪分支来引用另一个版本库, 并有助于与该版本库建立链接  
+使用 git remote 可以创建, 删除, 操作和查看远程版本库
+
+	常见命令: 
+
+	* git clone
+		> 将远程版本库克隆到本地
+	* git fetch
+		> 从远程版本库抓取对象及其元数据
+	* git pull 
+		> 跟 fetch 类似, 但合并修改到相应的本地分支
+	* git push
+		> 转移对象及其相关元数据到远程版本库
+	* git ls-remote
+		> 显示一个给定的远程版本库的引用列表
+
+* 追踪分支
+	* 远程追踪分支(remote-tracking branch) 与远程版本库相关联, 专门用来追踪远程版本库中每个分支的变化
+	* 本地追踪分支(local-tracking branch) 与远程追踪分支相配对, 它是一种集成分支, 用于收集本地开发和远程追踪分支中的变更
+	* 任何本地的非追踪分支通常称为特性(topic) 或开发分支(development)
+	* 为了完成命名空间, 远程分支是一个设在非本地的远程版本库的分支
+
+
+### 引用远程版本库
+Git 支持多种形式的统一资源定位符(Uniform Resource Locator, URL), URL可以用来命名远程版本库
+
+当你有一个数据必须通过网络获取的真正远程版本库时, 数据传输的最有效形式通常称为 Git 原生协议(Git native protocol), 它指的是Git内部用来传输数据的自定义协议
+
+
+### 远程版本库配置
+* 使用 git remote 
+	> git remote 用来操纵配置文件数据和远程版本库引用
+
+* 使用 git config
+	> git config 可以用来直接操纵配置文件中的条目
+
+
+## 补丁
+
+Git 实现三条特定的命令帮助交换补丁
+* git format-patch 会生成email形式的补丁
+* git send-email 会通过简单邮件传输协议(Simple Mail Transfer Protocol, SMTP) 来发送一个 Git 补丁
+* git am 会应用邮件消息中的补丁
+
+### 为什么要使用补丁
+* 有些情况下, 无论是推送还是拉取, Git 原生协议和HTTP协议都不能用来在版本库间交换数据
+* 对等开发模型的一个巨大优势就是合作, 补丁是一种向同行评审公开分发修改建议的手段
+
+### 生成补丁
+* 特定的提交数, 如 -3
+* 提交范围, 如 master~4..master~2
+* 单次提交, 通常是分支名, 如 origin/master
+``` bash 
+$ git format-patch -1
+```
+
+### 邮寄补丁
+``` bash
+$ git send-email -to simple@example.com 0001-A.patch
+```
+
+### 应用补丁
+``` bash 
+$ git am 0001-A.pathc
+```
+
+## 钩子
+* 前置(pre) 钩子会在动作完成之前调用
+* 后置(post) 钩子会在完成之后调用
+
+Junio 对钩子的总体看法
+合理的理由使用钩子
+1. 为了撤销低层命令做出的决定
+2. 为了在命令开始执行后对生成的数据进行操作
+3. 在仅能使用 Git 协议访问时, 对链接的远程端进行操作
+4. 为了获得互斥锁
+5. 为了根据命令的输出执行几种可能的操作
+
+## 子模块
+
+* git submodule add address localdirecotryname
+	> 为这个上层项目注册一个新的子模块
+
+* git submodule status
+	>  总结这个项目的所有子模块的提交引用和脏状态
+
+* git submodule init 
+	> 使用子模块信息长期存储的 .gitmodules 来更新开发人员版本库的 .git/config 文件
+
+* git submodule update 
+	> 使用 .git/config 中的地址抓取子模块的内容, 并在分离的HEAD指针状态下检出上层项目的子模块记录引用
+
+* git submodule summary
+	> 展示每个子模块当前状态相对于提交状态间变化的补丁
+
+* git submodule foreach command
+	> 对每个子模块执行一条 shell 命令并提供 $path, $sha1 和其他有用的标识符
+
+将一个子目录变为子模块的步骤: 
+1. 将子目录从上层项目中抽离出来, 使其与上层目录处于同一层
+2. 给这个子模块目录重命名
+3. 为子模块创建一个上游托管, 作为第一等项目
+4. 将现在独立的插件作为一个 Git 版本库进行初始化, 并推送提交到新建的托管项目URL
+5. 在上层项目中, 添加一个 Git 子模块, 指向新的子模块项目 URL 
+6. 提交并推送上层项目, 其中包括新建的 .gitmodules 文件
+
+
+
+
 
 
