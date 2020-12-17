@@ -183,3 +183,127 @@ Pool是Pool模式的并发安全实现, Pool模式是一种创建和提供可供
 3. 当你用完了一个从Pool中取出来的对象时, 一定要调用Put, 否则, Pool就无法复用这个实例了
 4. Pool内的分布必须大致均匀
 
+
+### channel
+channel 是由Hoare的CSP派生的同步原语, 一个channel充当信息传送的管道, 值可以沿着channel传递, 然后在下游读出
+
+* 创建双向channel
+	``` golang
+	var channel = make(chan interface{})
+	```
+
+* 创建只读channel
+	``` golang
+	var channel = make(<-chan interface{})
+	```
+
+* 创建只写channel
+	``` goland
+	var channel = make(chan<- interface{})
+	```
+	> golang中的channel是阻塞的, 所以只有channel中的数据被消费后, 新的数据才能写入, 而任何试图从空channel读取数据的goroutine将等待至少一条数据被写入channel之后才能读到
+
+* 创建buffered channel
+	``` golang
+	var channel = make(chan interface{}, 10)
+	```
+	> 缓冲channel 是一个内存中的FIFO队列, 用于并发进程进行通行
+
+操作 channel 的状态
+|操作|Channel 状态|结果|
+|:---:|:---:|:---:|
+|Read| nil | 阻塞 |
+|    | 打开非空| 输出值 |
+|    | 打开已空 | 阻塞 |
+|    | 关闭 | <零值>, false |
+|    | 只写   | 编译错误 |
+|Write| nil | 阻塞 |
+|     | 打开已满 | 阻塞 |
+|     | 打开未满 | 输入值 |
+|     | 关闭 | panic |
+|     | 只读 | 编译错误 |
+|close| nil | panic |
+|     | 打开非空 | 关闭channel, 读取成功, 数据耗尽后, 读取零值 |
+|     | 打开已空 | 关闭channel 读到零值 |
+|     | 关闭 | panic |
+|     | 只读 | 编译错误 |
+
+* 单向的channel声明的是一种工具, 他将允许我们区分channel 的拥有者和 channel 的使用者
+	> channel所有者对channel有一个写访问视图, 而channel 使用者只对channel 有一个只读视图
+
+拥有channel的goroutine应该具备如下:
+1. 实例化channel
+2. 执行写操作, 或将所有权传递给另一个goroutine
+3. 关闭channel
+4. 执行前三件事, 并通过一个只读channel将他们暴露出来
+
+
+### select
+select 语句是将channel绑定在一起的粘合剂
+
+``` golang
+var c1,c2 <-chan interface{}
+var c3 chan<- interface{}
+
+select {
+	case <-c1:
+	case <-c2:
+	case c3<-:
+}
+```
+### GOMAXPROCS 控制
+在runtime包中, GOMAXPROCS函数控制OS线程的数量
+
+在 1.5版本之前这个值默认被设置为1, 之后被默认设置为主机上逻辑CPU的数量
+
+
+## Go语言的并发模式
+
+### 约束
+* 用于共享内存的同步原语
+* 通过通信共享内存来进行同步
+
+### for-select 循环
+``` golang
+for {
+	select {
+	}
+}
+```
+
+* 向 channel 发送常量
+	``` golang 
+	for _, s := range []string{"a","b","c"} {
+		select {
+			case <-done:
+				return
+			case stream<- s:
+		}
+	}
+	```
+
+* 循环等待停止
+	```
+	for {
+		select {
+			case <-done:
+				return
+			default:
+		}
+	}
+	```
+
+### 防止 goroutine 泄漏
+goroutine会消耗资源, 并且goroutine不会被运行时垃圾回收, 所以要确保goroutine以正常的方式终止
+
+goroutine的终止方式:                                           
+* 当goroutine完成了任务
+* 因为不可恢复的错误, 他不能继续工作
+* 当它被告知需要终止工作
+
+goroutine负责创建goroutine, 它也可以确保goroutine停止
+
+
+### or-channel
+
+
