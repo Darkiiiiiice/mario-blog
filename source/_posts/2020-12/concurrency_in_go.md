@@ -4,7 +4,7 @@ date: '2020-12-16 22:00:00'
 category: Golang
 author: MarioMang
 cover: /resources/images/default_cover.gif
-updated: '2020-12-16 22:00:00'
+updated: '2020-12-17 22:00:00'
 ---
 
 # Golang 并发
