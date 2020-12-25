@@ -199,3 +199,60 @@ Redis的位数组是自动扩展的, 如果设置了某个偏移位置超出了�
 | HINCRBYFLOAT key field increment | 对Hash中的数值元素自增浮点值|
 
 ### 持久化
+
+* RDB 快照(Snapshot)
+  
+  保存某一时刻的数据状态, Redis默认的持久化方式, 保存文件是以.rdb形式结尾的文件  
+  快照生成方式:
+
+  * 客户端命令:
+    BGSAVE: 当接收到该指令时, Redis会fork()创建子进程, 子进程负责将fork()的副本快照写入磁盘中, 而父进程则继续处理请求
+    SAVE:   当接收到该指令时, Redis会在快照创建完成之前不再响应任何其他指令, 不再进行fork()操作, 直接由主进程创建快照
+
+  * 配置文件:
+    修改配置文件中的save项, redis会在满足save条件满足时触发BGSAVE指令
+
+  * SHUTDOWN:
+    当服务器接收到SHUTDOWN关机指令时, 服务器会主动创建快照
+
+* AOF 追加文件(append only file)
+
+  将所有Redis写命令记录到日志文件中, 以此来记录数据发生的变化
+
+  开启AOF持久化
+  * 修改appendonly yes|no
+  
+  AOF频率 appendfsync always|everysec|no
+  * always   每个Redis写命令都要同步写入硬盘
+  * everysec 每秒执行一次同步, 显示的将多个写命令同步到磁盘
+  * no       由操作系统决定何时同步
+  
+如果两种持久化同时被启用的时候, Redis启动时优先载入AOP持久化文件
+
+AOF文件的重写
+  AOF持久化的文件会随着操作越来越大, 为了压缩AOF的持久化文件Redis提供了AOF的重写机制
+
+  AOF重写方式
+
+  * 客户端重写
+    执行BGREWRITEAOF命令, 不会阻塞Redis服务
+  * 服务器配置
+    配置 auto-aof-rewrite-percentage
+
+  重写原理
+    重写AOF文件的操作, 并没有读取旧的AOF文件, 而是将整个内存中的数据库内容用命令的方式重写入新的AOF文件中, 并替换旧的AOF文件
+
+    1. Redis调用fork(), 创建子进程, 子进程根据内存中的数据库快照, 往临时文件中写入重建数据库状态的命令
+    2. 父进程继续处理client请求, 将写命令写入原来的AOF文件中, 同时缓存写命令, 保证子进程重写失败不影响数据库
+    3. 当子进程把快照内容写入临时AOF文件后, 子进程发信号通知父进程, 父进程将缓存写入临时AOF文件中
+    4. 父进程使用临时AOF文件替换旧的AOF文件, 将之后接收的写命令追加到新的AOF文件
+
+
+
+
+    
+
+
+
+
+
