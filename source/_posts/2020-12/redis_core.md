@@ -264,5 +264,111 @@ updated: '2020-12-26 20:00:00'
 
 ### 对象
 
-  
+  Redis使用对象来表示数据库中的键和值, 当Redis中创建一个键值对时, 至少会创建两个对象, 一个对象用作键值对的键, 另一个用作键值对的值对象
+
+  | 类型常量 | 名称 |
+  |:---:|:---:|
+  |REDIS_STRING| 字符串对象 |
+  |REDIS_LIST  | 列表对象   |
+  |REDIS_HASH  | 哈希对象   |
+  |REDIS_SET   | 集合对象   |
+  |REDIS_ZSET  | 有序集合   |
+
+  对象编码
+  | 编码常量 | 编码对应的底层数据结构 |
+  |REDIS_ENCODING_INT           |  long类型整数 |
+  |REDIS_ENCODING_EMBSTR        |  embstr编码的简单动态字符串 |
+  |REDIS_ENCODING_RAW           |  简单动态字符串 |
+  |REDIS_ENCODING_HT            |  字典 |
+  |REDIS_ENCODING_LINKEDLIST    |  双向链表 |
+  |REDIS_ENCODING_QUICKLIST     |  双向链表 |
+  |REDIS_ENCODING_ZIPLIST       |  压缩列表 |
+  |REDIS_ENCODING_INTSET        |  整数集合 |
+  |REDIS_ENCODING_SKIPLIST      |  跳跃表和字典 |
+
+  类型对象
+  | 类型 |  编码 | 对象  |
+  |:---:|:---:|:---:|
+  |REDIS_STRING|REDIS_ENCODING_INT|使用整数值实现的字符串对象|
+  |REDIS_STRING|REDIS_ENCODING_EMBSTR|使用embstr编码的SDS|
+  |REDIS_STRING|REDIS_ENCODING_RAW | SDS实现字符串|
+  |REDIS_LIST  |REDIS_ENCODING_QUICKLIST | 快速列表实现列表对象 |
+  |REDIS_HASH  |REDIS_ENCODING_ZIPLIST | 压缩列表实现哈希对象 |
+  |REDIS_HASH  |REDIS_ENCODING_HT   | 字典实现哈希对象 |
+  |REDIS_SET   |REDIS_ENCODING_INTSET  | 整数集合实现集合对象 |
+  |REDIS_SET   |REDIS_ENCODING_HT  | 字典实现集合对象 |
+  |REDIS_ZSET  |REDIS_ENCODING_ZIPLIST | 压缩列表实现有序集合对象 |
+  |REDIS_ZSET  |REDIS_ENCODING_SKIPLIST | 跳跃表和字典实现有序集合|
+
+  | Redis对象格式 |
+  |:---:|
+  |redisObject |
+  |type REDIS_STRING |
+  |encoding REDIS_ENCODING_INT |
+  |ptr |
+  |...|
+
+#### 字符串对象
+
+  字符串对象的编码可以是int, raw, embstr
+
+* 如果字符串对象保存的是整数值, 并且这个整数值可以用long类型表示, 那么字符串对象会将整数值保存在字符串对象结构的ptr属性里面, 并将字符串对象的编码设置为int
+* 如果字符串保存的是字符串值, 并且这个字符串的长度大于44字节, 那么字符串对象将使用一个简单动态字符串来保存字符串值, 并将编码设置为raw格式
+* 如果字符串保存的是字符串值, 并且字符串长度小于等于44字节, 那么字符串将编码设置为embstr
+  > sds需要分配两次内存, 分别为redisObject和sdshdr 结构来表示字符串对象,
+  > embstr则只需要分配一次内存, 空间中一次包含redisObject和sdshdr
+
+#### 列表对象
+
+  *以下内容在3.2版本之前有效*
+  列表对象的编码可以是ziplist或linkedlist
+
+* ziplist编码的列表对象使用压缩列表作为底层实现, 每个压缩列表节点保存了一个列表元素
+* linkedlist编码的列表对象使用双向链表作为底层实现, 每个双向链表节点都保存了一个字符串对象, 而每个字符串对象都保存了一个列表元素
+
+当列表对象可以同时满足以下两个条件时, 列表对象使用ziplist编码:
+
+* 列表对象保存的所有字符串元素的长度都小于64字节
+* 列表对象保存的元素数量小于512个
+不满足以上两个条件的列表对象使用linkedlist编码
+
+  *Redis3.2版本之后*
+  使用quicklist代替原来的方式, quicklist: A doubly linked list of ziplists
+  Quicklist是由ziplist组成的双向链表, 链表中的每个节点都以压缩列表ziplist的结构保存
+
+#### 哈希对象
+
+  哈希对象的编码可以是ziplist或者hashtable
+
+* ziplist编码的哈希对象使用压缩列表作为底层实现
+  * 保存键值对的两个节点总是在一起, 保存键的节点在前, 保存值的节点在后
+  * 先添加的哈希对象会被放在压缩列表的表头方向, 后添加的会被放在表尾
+* hashtable编码的哈希对象使用字典作为底层实现
+  * 字典的每个键都是一个字符串对象
+  * 字典的每个值都是一个字符串对象
+
+当哈希对象同时满足以下两个条件时, 使用ziplist编码:
+
+* 哈希对象保存的所有键值对的键和值的字符串长度都小于64字节
+* 哈希对象保存的键值对数量小于512个
+
+#### 集合对象
+
+  集合对象的编码可以是intset和hashtable
+
+当集合对象同时满足以下两个条件, 对象使用intset编码:
+
+* 集合对象保存的所有元素都是整数
+* 集合对象保存的元素数量不超过512个
+
+#### 有序集合对象
+
+  有序集合的编码可以是ziplist或者skiplist
+
+当有序集合同时满足以下两个条件时, 对象使用ziplist:
+
+* 有序集合保存的所有元素成员的长度都小于64字节
+* 有序集合保存的元素数量小于128个
+
+
 
