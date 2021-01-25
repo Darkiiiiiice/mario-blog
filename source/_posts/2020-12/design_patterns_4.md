@@ -13,7 +13,9 @@ updated: '2020-12-01 21:00'
 > 抽象工厂模式(Abstract Factory Pattern): 为创建一组相关或相互依赖的对象提供一个接口, 而且无须指定他们的具体类
 
 <div class="gallery-group-main">
+{% raw %}
 {% galleryGroup '抽象工厂模式' '抽象工厂模式类图' '/resources/images/abstract_factory.jpg' /resources/images/abstract_factory.jpg %}
+{% endraw %}
 </div>
 
 抽象工厂模式是工厂模式的升级, 在多个业务品种, 业务分类时, 通过抽象工厂模式产生需要的对象

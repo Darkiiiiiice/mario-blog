@@ -13,7 +13,9 @@ updated: '2020-11-30 21:00'
 > 工厂方式模式: 定义一个用户创建对象的接口, 让子类决定实例化哪一个类, 工厂方法使一个类实例化延迟到子类
 
 <div class="gallery-group-main">
+{% raw %}
 {% galleryGroup '工厂模式' '工厂模式类图' '/resources/images/factory.png' /resources/images/factory.png %}
+{% endraw %}
 </div>
 
 ``` Golang

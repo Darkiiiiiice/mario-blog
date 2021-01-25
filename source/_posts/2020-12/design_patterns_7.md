@@ -13,7 +13,9 @@ updated: '2020-12-07 22:00:00'
 > 代理模式(Proxy Pattern): 未其他对象提供一种代理以控制这个对象的访问, 也被称为委托模式
 
 <div class="gallery-group-main">
+{% raw %}
 {% galleryGroup '代理模式' '代理模式类图' '/resources/images/proxy.svg' /resources/images/proxy.svg %}
+{% endraw %}
 </div>
 
 代理模式角色: 
