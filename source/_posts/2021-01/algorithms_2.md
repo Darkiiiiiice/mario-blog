@@ -218,25 +218,130 @@ func (l *ArrayList) Delete(index int) {
 1. 便于首元结点的处理, 首元结点的地址保存在头结点的指针域中, 则对链表的第一个数据元素的操作与其他数据元素相同, 无需进行特殊处理
 2. 便于空表和非空表的统一处理, 当链表不设头结点时, 假设L为单链表的头指针, 它应该指向首元结点, 则当单链表长度为0时, L指针为空, 增加头结点后, 无论链表是否为空, 头指针都是指向头结点的非空指针
 
+#### 单链表结构
+
+``` golang
+type LinkedList struct {
+    length int
+    root   *Element
+}
+
+type Element struct {
+    Val  interface{}
+    next *Element
+}
+```
+
 #### 单链表的基本操作
 
 1. 初始化
+
+``` golang
+func InitLinkedList() *LinkedList {
+    var l = new(LinkedList)
+    l.root = nil
+    l.length = 0
+    return l
+}
+```
 
 2. 取值
 
 和顺序表不同, 链表中逻辑相邻的结点并没有存储在物理相邻的单元中, 只能从链表的首元结点出发, 顺着链域next逐个结点向下访问
 
+``` golang
+func (l *LinkedList) Get(index int) interface{} {
+    var cur = l.root
+
+    for index > 0 && cur.next != nil {
+        cur = cur.next
+        index--
+    }
+    return cur.Val
+}
+```
+
 3. 查找
 
 链表中按值查找的过程和顺序表类似, 从链表的首元结点出发, 一次将结点值和给定值进行比较, 返回查找结果
+
+``` golang
+func (l *LinkedList) Search(elem interface{}) int {
+    var cur = l.root
+
+    for i:=0; cur.next != nil; i++ {
+        if cur.Val == elem {
+            return i
+        }
+        cur = cur.next
+    }
+
+    return -1
+}
+```
 
 4. 插入
 
 首先生成一个数据域为x的结点, 然后插入到单链表中, 将插入位置的指针域指向结点x, 将结点x的指针域指向插入位置之前指向的结点
 
+``` golang
+func (l *LinkedList) InsertOfIndex(elem interface{}, index int) {
+    var n = &Element{
+        Val:  elem,
+        next: nil,
+    }
+
+    if index <= 0 {
+        l.InsertOfHead(elem)
+        return
+    } else if index >= l.length {
+        l.InsertOfTail(elem)
+        return
+    }
+
+    var cur = l.root
+
+    for index-1 > 0 && cur.next != nil {
+        cur = cur.next
+        index--
+    }
+
+    n.next = cur.next
+    cur.next = n
+    l.length++
+}
+```
+
 5. 删除
 
 要删除单链表中的制定位置的元素, 同插入元素一样, 首先应该找到该位置的前驱结点, 将前驱结点指向要删除元素指针域指向的位置
+
+``` golang
+func (l *LinkedList) Remove(index int) interface{} {
+    var cur = l.root
+
+    if index < 1 {
+        var tmp = cur
+        l.root = cur.next
+        return tmp.Val
+    }
+
+    if index >= l.length {
+        index = l.length - 1
+    }
+
+    for index-1 > 0 && cur.next != nil {
+        cur = cur.next
+        index--
+    }
+
+    var tmp = cur.next
+    cur.next = cur.next.next
+    l.length--
+
+    return tmp.Val
+}
+```
 
 6. 创建单链表
 
@@ -245,8 +350,45 @@ func (l *ArrayList) Delete(index int) {
   1. 前插法
     前插法时通过将新结点逐个插入链表的头部来创建链表, 每次申请一个新结点, 读入相应的数据元素值, 然后将新结点插入到头结点之后
 
+  ``` golang
+  func (l *LinkedList) InsertOfHead(elem interface{}) {
+     var n = &Element{
+         Val:  elem,
+         next: nil,
+     }
+
+     n.next = l.root
+     l.root = n
+     l.length++
+  }   
+  ```
+
   2. 后插法
     后插法时通过将新结点逐个插入到链表的尾部来创建链表
+
+  ``` golang
+  func (l *LinkedList) InsertOfTail(elem interface{}) {
+      var n = &Element{
+          Val:  elem,
+          next: nil,
+      }
+  
+      if l.root == nil {
+          l.root = n
+          l.length++
+          return
+      }
+  
+      var cur = l.root
+  
+      for cur.next != nil {
+          cur = cur.next
+      }
+  
+      cur.next = n
+      l.length++
+  }
+  ```
 
 ### 循环链表
 
